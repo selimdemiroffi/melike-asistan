@@ -11,14 +11,11 @@ GEMINI_KEY = os.getenv("GEMINI_KEY")
 VERIFY_TOKEN = "melike_asistan_2026"
 PHONE_NUMBER_ID = "1052737427912953" # Burayı başarıyla eklemişsin
 
-# Gemini Yapılandırması - GÜNCELLENDİ
+# Gemini Yapılandırması - GÜVENLİ VERSİYON
 genai.configure(api_key=GEMINI_KEY)
 
-# Bazı kütüphane versiyonlarında 'models/' ön eki şarttır
-try:
-    model = genai.GenerativeModel('gemini-1.5-flash')
-except:
-    model = genai.GenerativeModel('models/gemini-1.5-flash')
+# Bu format en güncel ve en kararlı olandır
+model = genai.GenerativeModel('gemini-1.5-flash-latest')
 
 # Melike'nin Karakter Tanımı
 MELIKE_PROMPT = (
@@ -78,4 +75,5 @@ def send_whatsapp_message(to, text):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 10000))
     app.run(host='0.0.0.0', port=port)
+
 
