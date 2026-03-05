@@ -20,8 +20,9 @@ def gemini_cevap(soru):
     try:
         r = requests.post(url, json=payload)
         return r.json()['candidates'][0]['content']['parts'][0]['text']
-    except:
-        return "Selim Bey şu an meşgul, en kısa sürede size dönüş yapacaktır."
+    except Exception as e:
+        print(f"HATA OLUŞTU: {e}") # Bu satır hatayı Render loglarına yazdıracak
+        return "Selim Bey şuan meşgul, en kısa sürede size dönüş yapacaktır."
 
 @app.route("/webhook", methods=["GET"])
 def verify():
@@ -48,4 +49,5 @@ def webhook():
     return "OK", 200
 
 if __name__ == "__main__":
+
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
