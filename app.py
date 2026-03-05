@@ -15,13 +15,18 @@ SISTEM_TALIMATI = """Adın Melike. Selim Bey'in asistanısın. Samimi ama profes
 Pazar hariç 19:00-23:00 arası çalışıyoruz. Kilo verme ve bütçe dostu programlarda uzmanız."""
 
 def gemini_cevap(soru):
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_KEY}"
-    payload = {"contents": [{"parts": [{"text": f"{SISTEM_TALIMATI}\n\nMüşteri: {soru}\nMelike:"}]}]}
     try:
-        r = requests.post(url, json=payload)
-        return r.json()['candidates'][0]['content']['parts'][0]['text']
+        # Mevcut model çağırma kodun...
+        response = model.generate_content(soru)
+
+        # Eğer candidates hatası veriyorsa sebebi budur:
+        if not response.candidates:
+            print("Gemini cevap üretemedi (Filtreye takılmış olabilir).")
+            return "Şu an cevap veremiyorum, lütfen başka bir şey sorar mısınız?"
+
+        return response.text
     except Exception as e:
-        print(f"HATA OLUŞTU: {e}") # Bu satır hatayı Render loglarına yazdıracak
+        print(f"HATA OLUŞTU: {e}")
         return "Selim Bey şuan meşgul, en kısa sürede size dönüş yapacaktır."
 
 @app.route("/webhook", methods=["GET"])
@@ -51,3 +56,4 @@ def webhook():
 if __name__ == "__main__":
 
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
