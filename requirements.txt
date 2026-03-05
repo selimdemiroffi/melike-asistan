@@ -1,3 +1,7 @@
 flask
-google-generativeai>=0.8.3
+
+google-generativeai
+
 requests
+
+gunicorn
