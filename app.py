@@ -39,61 +39,59 @@ def webhook():
     if request.method == "GET":
         token = request.args.get("hub.verify_token")
         challenge = request.args.get("hub.challenge")
-        print(f"GET doğrulama isteği. token={token}")
 
         if token == VERIFY_TOKEN:
             return challenge, 200
         return "Doğrulama hatası", 403
 
-    if request.method == "POST":
-        data = request.get_json(silent=True) or {}
-        print(f"Gelen POST verisi: {data}")
+    data = request.get_json(silent=True) or {}
+    print(f"Gelen POST verisi: {data}")
 
-        try:
-            value = data["entry"][0]["changes"][0]["value"]
+    try:
+        value = data["entry"][0]["changes"][0]["value"]
 
-            if "messages" not in value:
-                print("messages alanı yok.")
-                return "OK", 200
+        if "messages" not in value:
+            print("messages alanı yok.")
+            return "OK", 200
 
-            message = value["messages"][0]
+        message = value["messages"][0]
 
-            if message.get("type") != "text":
-                print("Text olmayan mesaj geldi.")
-                return "OK", 200
+        if message.get("type") != "text":
+            print("Text olmayan mesaj geldi.")
+            return "OK", 200
 
-            sender_id = message["from"]
-            user_text = message["text"]["body"].strip()
+        sender_id = message["from"]
+        user_text = message["text"]["body"].strip()
 
-            if not user_text:
-                return "OK", 200
+        if not user_text:
+            return "OK", 200
 
-            full_prompt = (
-                f"{MELIKE_PROMPT}\n\n"
-                f"Kullanıcının mesajı: {user_text}"
-            )
+        full_prompt = (
+            f"{MELIKE_PROMPT}\n\n"
+            f"Kullanıcının mesajı: {user_text}"
+        )
 
-            response = client.models.generate_content(
-                model=MODEL_ID,
-                contents=full_prompt,
-                config=types.GenerateContentConfig(
-                    temperature=0.7,
-                    max_output_tokens=300,
-                ),
-            )
+        response = client.models.generate_content(
+            model=MODEL_ID,
+            contents=full_prompt,
+            config=types.GenerateContentConfig(
+                temperature=0.7,
+                max_output_tokens=300,
+            ),
+        )
 
-            reply_text = (response.text or "").strip()
+        reply_text = (response.text or "").strip()
 
-            if not reply_text:
-                reply_text = "Şu an cevap oluşturamadım, lütfen tekrar yazar mısınız?"
+        if not reply_text:
+            reply_text = "Şu an cevap oluşturamadım, lütfen tekrar yazar mısınız?"
 
-            print(f"Gemini cevabı: {reply_text}")
-            send_whatsapp_message(sender_id, reply_text)
+        print(f"Gemini cevabı: {reply_text}")
+        send_whatsapp_message(sender_id, reply_text)
 
-        except Exception as e:
-            print(f"Hata: {e}")
+    except Exception as e:
+        print(f"Hata: {e}")
 
-        return "OK", 200
+    return "OK", 200
 
 
 def send_whatsapp_message(to, text):
@@ -122,4 +120,5 @@ def send_whatsapp_message(to, text):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
